@@ -1,0 +1,127 @@
+; Tontina CDDL Schema
+
+tontina = {
+    participants: [* participant],   ; List of active participants
+    rounds: [* round],               ; List of all rounds
+    tontina_state: tontina_state,    ; Current state information of the tontine
+    fees_config: fees_config,        ; Configuration for different types of fees
+    defi_features: [* defi_feature], ; Integrated DeFi features
+    governance: [* governance_proposal] ; List of governance proposals and rules
+}
+
+; Participant Structure
+participant = {
+    pub_key_hash: bytes,             ; Unique public key hash identifier
+    state_token: state_token,        ; NFT representing the participant's state
+    contribution_history: [* contribution], ; Record of contributions per round
+    collateral: collateral_data,     ; Collateral details for this participant
+    fees_paid: [* fee_record],       ; Record of fees paid by this participant
+    is_active: bool                  ; Status of participation (active/inactive)
+}
+
+; State Token Metadata (NFT)
+state_token = {
+    token_id: bytes,                 ; Unique token identifier (NFT ID)
+    metadata: {
+        participant_id: bytes,       ; Link to participant public key
+        joined_on: tdate,            ; Date the participant joined the tontine
+        status: "active" / "inactive", ; Status of the participant
+        contribution_count: uint,    ; Number of successful contributions
+        round_wins: uint             ; Number of rounds won
+    }
+}
+
+; Contribution Data
+contribution = {
+    round_id: uint,                  ; ID of the round for this contribution
+    amount: uint,                    ; Amount contributed (in ADA)
+    timestamp: tdate,                ; Timestamp of the contribution
+}
+
+; Round Details
+round = {
+    round_id: uint,                  ; Unique identifier for the round
+    pool_amount: uint,               ; Total pool amount for the round
+    participants: [* bytes],         ; List of public key hashes of participants
+    contribution_deadline: tdate,    ; Deadline for contributions
+    selected_winner: winner,         ; Details of the round's winner
+    collateral_required: bool        ; Indicator if collateral is mandatory
+}
+
+; Winner Details
+winner = {
+    pub_key_hash: bytes,             ; Public key hash of the winning participant
+    winning_amount: uint,            ; Amount won from the pool
+}
+
+; Tontina State Tracking
+tontina_state = {
+    current_round_id: uint,          ; ID of the current ongoing round
+    total_funds_locked: uint,        ; Total ADA locked in the contract
+    last_updated: tdate,             ; Last state update timestamp
+}
+
+; Collateral Management
+collateral_data = {
+    collateral_amount: uint,         ; Amount of collateral locked
+    collateral_status: "locked" / "forfeited" / "released", ; Collateral state
+    lock_timestamp: tdate,           ; When collateral was locked
+}
+
+; Fee Configuration and Record
+fees_config = {
+    participation_fee: uint,         ; Fixed fee to join the tontine (in ADA)
+    contribution_fee_percentage: float, ; Percentage fee applied to contributions
+    payout_fee_percentage: float,    ; Percentage fee deducted from payout
+    collateral_forfeiture_fee: uint  ; Fee charged on forfeited collateral
+}
+
+fee_record = {
+    fee_type: "participation" / "contribution" / "payout" / "collateral_forfeiture",
+    amount: uint,                    ; Fee amount (in ADA)
+    timestamp: tdate                ; When the fee was paid
+}
+
+; DeFi Integration Features
+defi_feature = staking_data / yield_farming_data / lending_data
+
+staking_data = {
+    staking_pool_id: tstr,           ; Unique ID of the staking pool
+    total_staked: uint,              ; Total ADA staked by participants
+    rewards_generated: uint,         ; Total rewards from staking
+    participants: [* bytes]          ; List of participant public key hashes
+}
+
+yield_farming_data = {
+    farming_pool_id: tstr,           ; Unique ID of the farming pool
+    farming_amount: uint,            ; Total amount staked in farming
+    farming_rewards: uint            ; Total rewards generated from farming
+}
+
+lending_data = {
+    loan_id: uint,                   ; Unique identifier for the loan
+    borrower_pub_key: bytes,         ; Public key hash of the borrower
+    collateral_token: state_token,   ; State token NFT used as collateral
+    loan_amount: uint,               ; Loan amount in ADA
+    interest_rate: float,            ; Interest rate applied
+    loan_status: "active" / "repaid" / "defaulted"
+}
+
+; Governance Mechanism
+governance_proposal = {
+    proposal_id: uint,               ; Unique ID of the governance proposal
+    created_by: bytes,               ; Public key hash of the proposal creator
+    proposal_type: "rule_change" / "feature_addition" / "other",
+    description: tstr,               ; Text description of the proposal
+    votes: [* vote],                 ; List of votes cast
+    status: "pending" / "approved" / "rejected"
+}
+
+vote = {
+    voter_pub_key: bytes,            ; Public key hash of the voter
+    vote_choice: "yes" / "no",       ; Vote choice (yes or no)
+    vote_timestamp: tdate            ; When the vote was cast
+}
+
+; Timestamp Type
+tdate = #6.1(int)                    ; Unix epoch timestamp in seconds
